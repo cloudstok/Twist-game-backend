@@ -182,6 +182,7 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
     });
     const winAmount = Number(game.bet) * partialPayout;
     const finalAmount = Math.min(winAmount, appConfig.maxCashoutAmount).toFixed(2);
+    game.multiplier = ["green", "orange", "purple"].reduce((sum, section) => sum + (game[section].at(-1) || 0), 0);
     game.bank -= finalAmount;
     await setCache(`GM:${playerDetails.id}`, JSON.stringify(game), 3600);
     const userIP = socket.handshake.headers?.['x-forwarded-for']?.split(',')[0].trim() || socket.handshake.address;
@@ -199,6 +200,7 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
     playerDetails.balance = (Number(playerDetails.balance) + Number(finalAmount)).toFixed(2);
     await setCache(`PL:${playerDetails.socketId}`, JSON.stringify(playerDetails));
     socket.emit('info', { user_id: playerDetails.userId, operator_id: playerDetails.operatorId, balance: playerDetails.balance });
+    if(game.bank <= 0) game.matchId = ''; deleteCache(`GM:${playerDetails.id}`);
     return {
         payout: finalAmount,
         matchId: game.matchId,
