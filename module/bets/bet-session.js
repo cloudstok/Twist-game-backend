@@ -83,7 +83,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
         if (payout) {
             currentMultiplier = payout;
             game[section].pop();
-            if(section == 'purple'){
+            if (section == 'purple') {
                 game.bank -= game.bet * game[section][game[section].length - 1];
                 game[section] = [];
             }
@@ -201,7 +201,7 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
     playerDetails.balance = (Number(playerDetails.balance) + Number(finalAmount)).toFixed(2);
     await setCache(`PL:${playerDetails.socketId}`, JSON.stringify(playerDetails));
     socket.emit('info', { user_id: playerDetails.userId, operator_id: playerDetails.operatorId, balance: playerDetails.balance });
-    if(game.bank <= 0) game.matchId = ''; deleteCache(`GM:${playerDetails.id}`);
+    if (game.bank <= 0) { game.matchId = ''; deleteCache(`GM:${playerDetails.id}`) };
     return {
         payout: finalAmount,
         matchId: game.matchId,
