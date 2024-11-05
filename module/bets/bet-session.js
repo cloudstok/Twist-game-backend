@@ -177,7 +177,8 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
     let partialPayout = 0;
     ["green", "orange", "purple"].forEach(section => {
         if (game[section].length) {
-            partialPayout += game[section].pop();
+            partialPayout += dynamicSubtraction(game[section]);
+            game[section].pop();
         }
     });
     const winAmount = Number(game.bet) * partialPayout;
