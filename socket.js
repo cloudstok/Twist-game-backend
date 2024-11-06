@@ -18,7 +18,7 @@ export const initSocket = (io)=> {
             return socket.disconnect(true); 
         };
 
-        socket.emit('info', { user_id: userData.userId, operator_id: userData.operatorId, balance: userData.balance});
+        socket.emit('info', { user_id: userData.userId, operator_id: userData.operatorId, balance: Number(userData.balance).toFixed(2)});
         await setCache(`PL:${socket.id}`, JSON.stringify({...userData, socketId: socket.id}), 3600);
         reconnect(socket);
         registerEvents(io, socket);

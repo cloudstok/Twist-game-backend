@@ -59,7 +59,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
     const transaction = await updateBalanceFromAccount(updateBalanceData, "DEBIT", playerDetails);
     if (!transaction) return socket.emit('betError', 'Bet Cancelled by Upstream');
 
-    playerDetails.balance -= game.bet;
+    playerDetails.balance = (playerDetails.balance - game.bet).toFixed(2);
     await setCache(`PL:${playerDetails.socketId}`, JSON.stringify(playerDetails));
     socket.emit('info', { user_id: playerDetails.userId, operator_id: playerDetails.operatorId, balance: playerDetails.balance });
 
@@ -89,7 +89,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
             }
 
             const winAmount = Math.min(game.bet * currentMultiplier, appConfig.maxCashoutAmount).toFixed(2);
-            const creditData = { id: game.id, winning_amount: winAmount, socket_id: playerDetails.socketId, txn_id: game.txn_id, user_id: playerId, ip: userIP };
+            const creditData = { id: game.roundId, winning_amount: winAmount, socket_id: playerDetails.socketId, txn_id: game.txn_id, user_id: playerId, ip: userIP };
             const creditTransaction = await updateBalanceFromAccount(creditData, "CREDIT", playerDetails);
 
             if (!creditTransaction) console.error(`Credit failed for user: ${playerDetails.userId} for round ${game.roundId}`);
@@ -137,7 +137,8 @@ export const spinGem = async (game, playerDetails, socket, io) => {
         betId: game.roundId,
         userId: `${playerDetails.userId.slice(0, 2)}**${playerDetails.userId.slice(-2)}`,
         payout: currentMultiplier,
-        Profit: game.bet * currentMultiplier - game.bet
+        Profit: game.bet * currentMultiplier - game.bet,
+        created_at: new Date()
     });
 
     return {
@@ -189,7 +190,7 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
     const userIP = socket.handshake.headers?.['x-forwarded-for']?.split(',')[0].trim() || socket.handshake.address;
 
     const updateBalanceData = {
-        id: game.id,
+        id: game.roundId,
         winning_amount: finalAmount,
         socket_id: playerDetails.socketId,
         txn_id: game.txn_id,
