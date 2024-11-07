@@ -7,7 +7,7 @@
    `operator_id` varchar(255) DEFAULT NULL,
    `bet_amount` decimal(10, 2) DEFAULT 0.00,
    `max_mult` decimal(10, 2) DEFAULT 0.00,
-   `status` varchar(255) DEFAULT NULL,
+   `status` ENUM('WIN', 'LOSS') NOT NULL,
    `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
    PRIMARY KEY (`settlement_id`)
  );
