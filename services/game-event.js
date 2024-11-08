@@ -37,6 +37,9 @@ export const startGame = async(io, socket, betAmount) => {
     socket.emit("game_started", game);
     const result = await spinGem(game, playerDetails, socket, io);
     betLogger.info(JSON.stringify({ ...gameLog, result}));
+    if(result['error']){
+        return socket.emit('betError', result['error']);
+    }
     return socket.emit("spin_result", result);
 };
 
@@ -48,6 +51,9 @@ export const spin = async(io, socket) => {
     if(Number(playerDetails.balance) < game.bet) return logEventAndEmitResponse(betLog, 'Insufficient Balance', 'bet', socket);
     const result = await spinGem(game, playerDetails, socket, io);
     betLogger.info(JSON.stringify({ ...betLog, result}));
+    if(result['error']){
+        return socket.emit('betError', result['error']);
+    }
     return socket.emit("spin_result", result);
 };
 
