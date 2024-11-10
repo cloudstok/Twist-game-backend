@@ -77,7 +77,6 @@ export const prepareDataForWebhook = async(betObj, key) => {
             case "DEBIT":
                 obj.amount = bet_amount,
                 obj.description = `${bet_amount} debited for Twist game for bet_id ${id}`;
-                obj.bet_id = id;
                 obj.txn_type = 0;
                 break;
             case "CREDIT":
