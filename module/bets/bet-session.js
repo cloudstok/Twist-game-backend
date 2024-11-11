@@ -152,7 +152,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
         betId: game.roundId,
         userId: `${playerDetails.userId.slice(0, 2)}**${playerDetails.userId.slice(-2)}`,
         payout: currentMultiplier,
-        Profit: game.bet * currentMultiplier - game.bet,
+        Profit: Number(game.bet * currentMultiplier - game.bet).toFixed(2),
         created_at: new Date()
     });
 
