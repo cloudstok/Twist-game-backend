@@ -1,4 +1,5 @@
  CREATE DATABASE twist_game;
+ USE twist_game;
  CREATE TABLE IF NOT EXISTS `settlement`(
    `settlement_id` int NOT NULL AUTO_INCREMENT,
    `bet_id` varchar(255) DEFAULT NULL,
