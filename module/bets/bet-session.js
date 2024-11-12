@@ -57,7 +57,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
     };
 
     const transaction = await updateBalanceFromAccount(updateBalanceData, "DEBIT", playerDetails);
-    if (!transaction) return { error: 'Bet Cancelled by Upstream'};
+    if (!transaction) return { error: 'Bet Cancelled by Upstream' };
 
     playerDetails.balance = (playerDetails.balance - game.bet).toFixed(2);
     await setCache(`PL:${playerDetails.socketId}`, JSON.stringify(playerDetails));
@@ -67,15 +67,22 @@ export const spinGem = async (game, playerDetails, socket, io) => {
     game.darkGem = game.stone = false;
     game.result = '';
     let currentMultiplier = 0;
-    let spinResult = Math.random();
-    if (spinResult <= 0.6) {
-        spinResult = Math.random() * 0.5; 
-    } else {
-        spinResult = 0.5 + Math.random() * 0.5; 
-    };
+    const spinResult = Math.random();
     const sectionData = { green: game.green, orange: game.orange, purple: game.purple };
-    if (spinResult > 0.5) {
-        const section = spinResult < 0.7 ? "green" : spinResult < 0.9 ? "orange" : "purple";
+    if (spinResult <= 0.45) {
+        game.darkGem = true;
+        game.bank -= game.bet;
+    } else if (spinResult <= 0.67) {
+        ["green", "orange", "purple"].forEach(section => {
+            if (game[section].length) {
+                currentMultiplier -= game[section].at(-1);
+                game[section].pop();
+                sectionData[section] = JSON.parse(JSON.stringify(game[section]));
+            }
+        });
+        game.stone = true;
+    } else {
+        const section = spinResult <= 0.82 ? "green" : spinResult <= 0.94 ? "orange" : "purple";
         game.result = section;
 
         const sectionFilled = game[section].length === game.multipliers[section].length;
@@ -95,8 +102,8 @@ export const spinGem = async (game, playerDetails, socket, io) => {
             }
 
             const winAmount = Math.min(game.bet * currentMultiplier, appConfig.maxCashoutAmount).toFixed(2);
-            setTimeout(()=> {
-                socket.emit('payout', { matchId: game.matchId, payout: (winAmount - game.bet).toFixed(2)});
+            setTimeout(() => {
+                socket.emit('payout', { matchId: game.matchId, payout: (winAmount - game.bet).toFixed(2) });
                 socket.emit('spin_result', {
                     matchId: game.matchId,
                     roundId: game.roundId,
@@ -117,18 +124,6 @@ export const spinGem = async (game, playerDetails, socket, io) => {
             await setCache(`PL:${playerDetails.socketId}`, JSON.stringify(playerDetails));
             socket.emit('info', { user_id: playerDetails.userId, operator_id: playerDetails.operatorId, balance: playerDetails.balance });
         }
-    } else if (spinResult > 0.3) {
-        game.darkGem = true;
-        game.bank -= game.bet;
-    } else {
-        ["green", "orange", "purple"].forEach(section => {
-            if (game[section].length) {
-                currentMultiplier -= game[section].at(-1);
-                game[section].pop();
-                sectionData[section] = JSON.parse(JSON.stringify(game[section]));
-            }
-        });
-        game.stone = true;
     }
 
     //Insert Settlement into Database
