@@ -67,7 +67,12 @@ export const spinGem = async (game, playerDetails, socket, io) => {
     game.darkGem = game.stone = false;
     game.result = '';
     let currentMultiplier = 0;
-    const spinResult = Math.random();
+    let spinResult = Math.random();
+    if (spinResult <= 0.6) {
+        spinResult = Math.random() * 0.5; 
+    } else {
+        spinResult = 0.5 + Math.random() * 0.5; 
+    };
     const sectionData = { green: game.green, orange: game.orange, purple: game.purple };
     if (spinResult > 0.5) {
         const section = spinResult < 0.7 ? "green" : spinResult < 0.9 ? "orange" : "purple";
