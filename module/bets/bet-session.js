@@ -69,10 +69,10 @@ export const spinGem = async (game, playerDetails, socket, io) => {
     let currentMultiplier = 0;
     const spinResult = Math.random();
     const sectionData = { green: game.green, orange: game.orange, purple: game.purple };
-    if (spinResult <= 0.45) {
+    if (spinResult <= 0.41) {
         game.darkGem = true;
         game.bank -= game.bet;
-    } else if (spinResult <= 0.67) {
+    } else if (spinResult <= 0.61) {
         ["green", "orange", "purple"].forEach(section => {
             if (game[section].length) {
                 currentMultiplier -= game[section].at(-1);
@@ -82,7 +82,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
         });
         game.stone = true;
     } else {
-        const section = spinResult <= 0.82 ? "green" : spinResult <= 0.94 ? "orange" : "purple";
+        const section = spinResult <= 0.79 ? "green" : spinResult <= 0.92 ? "orange" : "purple";
         game.result = section;
 
         const sectionFilled = game[section].length === game.multipliers[section].length;
