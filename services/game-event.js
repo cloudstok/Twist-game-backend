@@ -38,6 +38,7 @@ export const startGame = async(io, socket, betAmount) => {
     const result = await spinGem(game, playerDetails, socket, io);
     betLogger.info(JSON.stringify({ ...gameLog, result}));
     if(result['error']){
+        await deleteCache(`GM:${playerDetails.id}`);
         return socket.emit('betError', result['error']);
     }
     return socket.emit("spin_result", result);
