@@ -20,8 +20,6 @@ export const generateUUIDv7 = () => {
     return uuid.join('-');
 }
 
-
-
 export const updateBalanceFromAccount = async(data, key, playerDetails) => {
     try {
         const webhookData = await prepareDataForWebhook({ ...data, game_id: playerDetails.game_id }, key);
@@ -62,7 +60,6 @@ export const sendRequestToAccounts = async(webhookData, token)=> {
         return false;
     }
 }
-
 
 export const prepareDataForWebhook = async(betObj, key) => {
     try {

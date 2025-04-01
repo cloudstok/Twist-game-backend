@@ -13,6 +13,7 @@ export const createGameData = (matchId, betAmount) => {
         green: [],
         orange: [],
         purple: [],
+        txn_id: [],
         multipliers: {
             green: [1.6, 5.0, 10.5],
             orange: [2.5, 8.0, 16.5, 28.5, 45.0],
@@ -63,16 +64,17 @@ export const spinGem = async (game, playerDetails, socket, io) => {
     await setCache(`PL:${playerDetails.socketId}`, JSON.stringify(playerDetails));
     socket.emit('info', { user_id: playerDetails.userId, operator_id: playerDetails.operatorId, balance: playerDetails.balance });
 
-    game.txn_id = transaction.txn_id;
+    game.txn_id.push(transaction.txn_id);
     game.darkGem = game.stone = false;
     game.result = '';
     let currentMultiplier = 0;
-    const spinResult = Math.random();
+    // const spinResult = Math.random();
+    const  spinResult = 0.68
     const sectionData = { green: game.green, orange: game.orange, purple: game.purple };
-    if (spinResult <= 0.41) {
+    if (spinResult <= 0.51) {
         game.darkGem = true;
         game.bank -= game.bet;
-    } else if (spinResult <= 0.61) {
+    } else if (spinResult <= 0.67) {
         ["green", "orange", "purple"].forEach(section => {
             if (game[section].length) {
                 currentMultiplier -= game[section].at(-1);
@@ -82,7 +84,7 @@ export const spinGem = async (game, playerDetails, socket, io) => {
         });
         game.stone = true;
     } else {
-        const section = spinResult <= 0.79 ? "green" : spinResult <= 0.92 ? "orange" : "purple";
+        const section = spinResult <= 0.82 ? "green" : spinResult <= 0.93 ? "orange" : "purple";
         game.result = section;
 
         const sectionFilled = game[section].length === game.multipliers[section].length;
@@ -172,11 +174,13 @@ export const spinGem = async (game, playerDetails, socket, io) => {
 export const cashOutAmount = async (game, playerDetails, socket) => {
     const winAmount = Math.min(game.bank, appConfig.maxCashoutAmount).toFixed(2);
     const userIP = socket.handshake.headers?.['x-forwarded-for']?.split(',')[0].trim() || socket.handshake.address;
+    const txn_id = game.txn_id[0];
+    game.txn_id.shift();
     const updateBalanceData = {
         id: game.roundId,
         winning_amount: winAmount,
         socket_id: playerDetails.socketId,
-        txn_id: game.txn_id,
+        txn_id: txn_id,
         user_id: playerDetails.id.split(':')[1],
         ip: userIP
     };
@@ -201,6 +205,8 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
     const finalAmount = Math.min(winAmount, appConfig.maxCashoutAmount).toFixed(2);
     game.multiplier = ["green", "orange", "purple"].reduce((sum, section) => sum + (game[section].at(-1) || 0), 0);
     game.bank -= finalAmount;
+    const txn_id = game.txn_id[0];
+    game.txn_id.shift();
     await setCache(`GM:${playerDetails.id}`, JSON.stringify(game), 3600);
     const userIP = socket.handshake.headers?.['x-forwarded-for']?.split(',')[0].trim() || socket.handshake.address;
 
@@ -208,7 +214,7 @@ export const cashOutPartial = async (game, playerDetails, socket) => {
         id: game.roundId,
         winning_amount: finalAmount,
         socket_id: playerDetails.socketId,
-        txn_id: game.txn_id,
+        txn_id: txn_id,
         user_id: playerDetails.id.split(':')[1],
         ip: userIP
     };
